@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 
 export default function Page() {
   return (
@@ -7,12 +7,13 @@ export default function Page() {
       <View style={styles.main}>
         <Text style={styles.title}>Spotz</Text>
         <Text style={styles.subtitle}>Shoot and Share a skate spot so the homies know where to roll.</Text>
-        <Link href="/map/Map">
-          <Text>
-            Map
-          </Text>
-        </Link>
       </View>
+
+      <Pressable onPress={() => router.push("/map/Map")} style={styles.pressable}>
+        <Text>
+          Start
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -22,6 +23,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     padding: 24,
+  },
+  pressable: {
+    width: '40%',
+    marginTop: 10,
+    padding: 15,
+    backgroundColor: '#ADD4B6',
+    borderWidth: 1,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   main: {
     flex: 1,
