@@ -37,7 +37,4 @@ const styles = StyleSheet.create({
     fontSize: 36,
     color: "#38434D",
   },
-  pressable: {
-
-  }
 });
