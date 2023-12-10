@@ -31,6 +31,7 @@ export default function Map() {
 
   const onRegionChange = (region) => {
     console.log(region)
+    setDraggableMarker(region)
   };
 
   const showLocationOfInterest = () => {
