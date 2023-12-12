@@ -1,8 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 let locationOfInterest = [
   {
@@ -29,10 +30,21 @@ export default function Map() {
     longitude: 144.9620
   });
 
-  const onRegionChange = (region) => {
-    console.log(region)
-    setDraggableMarker(region)
-  };
+  const dropPinOnSpot = (region) => {
+
+    return (
+      setDraggableMarker(region)
+      //place pin
+  
+      //take a picture/ upload a picture of the spot
+  
+      //add notes about the spot in description
+  
+      //place marker with notes
+  
+      //drop pin and save to DB
+    );
+  }
 
   const showLocationOfInterest = () => {
     return locationOfInterest.map((item, index) => {
@@ -69,10 +81,10 @@ export default function Map() {
   // }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <MapView 
         style={styles.map} 
-        onRegionChange={onRegionChange}
+        onRegionChange={dropPinOnSpot}
         initialRegion={{
             latitude: -37.8136,
             latitudeDelta: 0.0922,
@@ -97,13 +109,15 @@ export default function Map() {
           </Text>
         </Pressable> */}
 
-        <Pressable onPress={() => router.push("/")}>
+        <Button title='Drop Pin' onPress={dropPinOnSpot} />
+
+        <Pressable style={styles.pressable} onPress={() => router.push("/")}>
           <Text>
             Back
           </Text>
         </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -139,9 +153,20 @@ const styles = StyleSheet.create({
   },  
   map: {
     width: '100%',
-    height: '100%',
+    height: '80%',
+  },
+  buttonStyles: {
+    width: '40%',
+    padding: 15,
+    margin: 5,
+    backgroundColor: '#E6BAAC',
+    borderWidth: 1,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonContainer: {
+    flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
