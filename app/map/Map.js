@@ -1,5 +1,5 @@
 import { Button, Pressable, StyleSheet, Text, View } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
@@ -22,29 +22,19 @@ let locationOfInterest = [
     },
     description: 'Second Marker'
   }
-]
+];
 
 export default function Map() {
+  const [location, setLocation] = useState({});
+  const [errorMsg, setErrorMsg] = useState(null);
   const [draggableMarker, setDraggableMarker] = useState({
     latitude: -37.8120,
-    longitude: 144.9620
+    longitude: 144.9620,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0144,
   });
 
-  const dropPinOnSpot = (region) => {
-
-    return (
-      setDraggableMarker(region)
-      //place pin
-  
-      //take a picture/ upload a picture of the spot
-  
-      //add notes about the spot in description
-  
-      //place marker with notes
-  
-      //drop pin and save to DB
-    );
-  }
+  const mapRef = useRef(null);
 
   const showLocationOfInterest = () => {
     return locationOfInterest.map((item, index) => {
@@ -56,61 +46,71 @@ export default function Map() {
           description={item.description}
         />
       )
-    })
+    });
   };
 
 
-  // //USER LOCATION FOR PRECISE LOCATION
-  // const userLocation = async () => {
-  //   let {status} = await Location.requestForegroundPermissionsAsync();
-  //   if (!status){
-  //     setErrorMsg('Permission to access your Location denied by User');
-  //   }
-  //   let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true });
-  //   setMapRegion({
-  //     latitude: location.coords.latitude,
-  //     longitude: location.coords.longitude,
-  //     latitudeDelta: 0.0922,
-  //     longitudeDelta: 0.0421,
-  //   });
-  //   console.log(location.coords.latitude, location.coords.longitude);
-  // }
+  //USER LOCATION FOR PRECISE LOCATION
+  useEffect(() => {
+    (async () => {
+      
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        console.log('location permission granted')
+      } else {
+        setErrorMsg('Permission to access location was denied');
+      }
 
-  // useEffect(() => {
-  //   userLocation();
-  // }, []);
+      let userLocation = await Location.getCurrentPositionAsync({});
+      console.log('user location:', location)
+      setLocation(userLocation);
+    })();
+  }, []);
+
+  let text = 'Waiting..';
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
+
+  let userLatitude = text.latitude
+  let userLongitude = text.longitude
+
+
+  //GO TO USER'S LOCATION
+  const goToUserLocation = () => {
+    if (location) {
+      mapRef.current.animateToRegion({
+        latitude: userLatitude,
+        longitude: userLongitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0144,
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <MapView 
+        ref={mapRef}
         style={styles.map} 
-        onRegionChange={dropPinOnSpot}
-        initialRegion={{
-            latitude: -37.8136,
-            latitudeDelta: 0.0922,
-            longitude: 144.9631,
-            longitudeDelta: 0.0144,
-        }}
+        showsUserLocation={true}
+        onRegionChange={setDraggableMarker}
       >
         {showLocationOfInterest()}
         <Marker 
           draggable
+          title='Marker Title'
+          description='Marker to place at a new skate spot'
           pinColor='#0000ff'
-          coordinate={draggableMarker} 
+          coordinate={draggableMarker}
           onDragEnd={(e) => setDraggableMarker(e.nativeEvent.coordinate)}
         />
       </MapView>
 
       <View style={styles.buttonContainer}>
-
-      {/* <Pressable onPress={userLocation}>
-          <Text>
-            Get Location
-          </Text>
-        </Pressable> */}
-
-        <Button title='Drop Pin' onPress={dropPinOnSpot} />
-
+      <Button title='Location' onPress={goToUserLocation} />
         <Pressable style={styles.pressable} onPress={() => router.push("/")}>
           <Text>
             Back
@@ -127,46 +127,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     textAlign: 'center',
   },
-  getLocationPressable: {
-    width: '40%',
-    padding: 15,
-    margin: 5,
-    backgroundColor: '#B3E6B5',
-    borderWidth: 1,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   pressable: {
     width: '40%',
     padding: 15,
     margin: 5,
-    backgroundColor: '#E6BAAC',
+    backgroundColor: '#1AFFD5',
     borderWidth: 1,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  touchableOpacityText: {
-    textAlign: 'center', // Center text horizontally
-    lineHeight: 45,
-  },  
   map: {
+    flex: 1,
     width: '100%',
-    height: '80%',
-  },
-  buttonStyles: {
-    width: '40%',
-    padding: 15,
-    margin: 5,
-    backgroundColor: '#E6BAAC',
-    borderWidth: 1,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: '100%',
   },
   buttonContainer: {
-    flex: 1,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
