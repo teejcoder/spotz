@@ -29,13 +29,7 @@ let locationOfInterest = [
 // MAP COMPONENT
 export default function Map() {
   const [location, setLocation] = useState();
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [draggableMarker, setDraggableMarker] = useState({
-    latitude: -37.8120,
-    longitude: 144.9620,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-  });
+  const [draggableMarker, setDraggableMarker] = useState({});
 
   const mapRef = useRef(null);
 
@@ -65,7 +59,8 @@ export default function Map() {
 
       let currentLocation = await Location.getCurrentPositionAsync({});
       setLocation(currentLocation.coords);
-      console.log('location', currentLocation.coords)
+      console.log('User Location :', currentLocation.coords)
+
     };
 
     getPermissions();
