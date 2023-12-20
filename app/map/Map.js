@@ -5,6 +5,8 @@ import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
+// EXAMPLE MARKERS
 let locationOfInterest = [
   {
     title: 'First Marker',
@@ -24,18 +26,20 @@ let locationOfInterest = [
   }
 ];
 
+// MAP COMPONENT
 export default function Map() {
-  const [location, setLocation] = useState({});
+  const [location, setLocation] = useState();
   const [errorMsg, setErrorMsg] = useState(null);
   const [draggableMarker, setDraggableMarker] = useState({
     latitude: -37.8120,
     longitude: 144.9620,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0144,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
   });
 
   const mapRef = useRef(null);
 
+  //RENDER EXAMPLE MARKERS
   const showLocationOfInterest = () => {
     return locationOfInterest.map((item, index) => {
       return (
@@ -52,40 +56,30 @@ export default function Map() {
 
   //USER LOCATION FOR PRECISE LOCATION
   useEffect(() => {
-    (async () => {
-      
+    const getPermissions = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        console.log('location permission granted')
-      } else {
-        setErrorMsg('Permission to access location was denied');
+      if ( status !== 'granted') {
+        console.log('Please grant location permission')
+        return;
       }
 
-      let userLocation = await Location.getCurrentPositionAsync({});
-      console.log('user location:', location)
-      setLocation(userLocation);
-    })();
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation.coords);
+      console.log('location', currentLocation.coords)
+    };
+
+    getPermissions();
   }, []);
 
-  let text = 'Waiting..';
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
 
-  let userLatitude = text.latitude
-  let userLongitude = text.longitude
-
-
-  //GO TO USER'S LOCATION
+  //FUNCTION FOR BUTTON TO GO TO USER'S LOCATION
   const goToUserLocation = () => {
     if (location) {
       mapRef.current.animateToRegion({
-        latitude: userLatitude,
-        longitude: userLongitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0144,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
       });
     }
   };
@@ -97,6 +91,7 @@ export default function Map() {
         style={styles.map} 
         showsUserLocation={true}
         onRegionChange={setDraggableMarker}
+        initialRegion={location}
       >
         {showLocationOfInterest()}
         <Marker 
